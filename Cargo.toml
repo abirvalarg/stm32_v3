@@ -1,0 +1,13 @@
+[package]
+name = 'stm32_libs'
+version = "0.1.0"
+edition = "2018"
+
+[features]
+default = ["default_panic", "f401"]
+default_panic = []
+f4 = []
+f40 = ["f4"]
+f401 = ["f40"]
+f405 = ["f40"]
+f407 = ["f40"]
