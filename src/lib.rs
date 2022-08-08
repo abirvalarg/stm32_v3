@@ -1,6 +1,12 @@
 #![no_std]
 #![no_main]
+#![feature(arbitrary_self_types)]
+#![feature(alloc_error_handler)]
 
+#[cfg(feature = "heap")]
+mod allocator;
+#[cfg(feature = "async")]
+pub mod executor;
 pub mod sync;
 
 #[cfg(feature = "f40")]
