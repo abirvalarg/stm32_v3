@@ -39,6 +39,8 @@ impl<T> SyncCell<T> {
 	}
 }
 
+unsafe impl<T> Sync for SyncCell<T> {}
+
 pub struct SyncGuard<T>(*mut T);
 
 impl<T> Deref for SyncGuard<T> {
