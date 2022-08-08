@@ -4,10 +4,14 @@
 #![feature(alloc_error_handler)]
 
 #[cfg(feature = "heap")]
+extern crate alloc;
+
+#[cfg(feature = "heap")]
 mod allocator;
 #[cfg(feature = "async")]
 pub mod executor;
 pub mod sync;
+pub mod mutex;
 
 #[cfg(feature = "f40")]
 pub mod rcc {
