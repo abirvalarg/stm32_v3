@@ -7,10 +7,21 @@ __attribute__((weak, alias("default_handler")))
 void NMI();
 __attribute__((weak, alias("default_handler")))
 void hardfault();
+__attribute__((weak, alias("default_handler")))
+void TIM3();
 
-__attribute__((section(".rodata.vector")))
+__attribute__((section(".vector")))
 void *vector[] = {
-	&_STACK, reset, NMI, hardfault
+	&_STACK, reset, NMI, hardfault,
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0,
+	// 0
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	// 10
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	// 20
+	0, 0, 0, 0, 0, 0, 0, 0, 0, TIM3,
 };
 
 void default_handler()

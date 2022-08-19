@@ -1,6 +1,6 @@
 use core::{sync::atomic::{AtomicU16, Ordering}};
 
-use crate::{rcc::{Module, Ahb1Module}, sync::block_irq};
+use crate::sync::block_irq;
 
 #[repr(C)]
 #[allow(non_snake_case)]
@@ -19,21 +19,15 @@ struct Reg {
 
 pub struct Gpio {
 	hw: *mut Reg,
-	module: Module,
 	used_pins: AtomicU16
 }
 
 impl Gpio {
-	const fn new(addr: usize, module: Module) -> Self {
+	const fn new(addr: usize) -> Self {
 		Gpio {
 			hw: addr as *mut Reg,
-			module,
 			used_pins: AtomicU16::new(0)
 		}
-	}
-
-	pub fn switch(&self, state: bool) {
-		crate::rcc::RCC.switch(self.module, state);
 	}
 
 	pub fn pin(&'static self, num: u8) -> Option<Pin> {
@@ -101,6 +95,14 @@ impl Pin {
 			reg.write_volatile(val | af << pos);
 		});
 	}
+
+	pub fn write(&mut self, val: bool) {
+		let pos = self.num + if !val { 16 } else { 0 };
+		unsafe {
+			let reg = &mut (*self.gpio.hw).BSRR as *mut usize;
+			reg.write_volatile(1 << pos);
+		}
+	}
 }
 
 #[derive(Copy, Clone)]
@@ -130,4 +132,5 @@ pub enum PullMode {
 	PullDown = 2
 }
 
-pub static GPIOA: Gpio = Gpio::new(0x4002_0000, Module::Ahb1(Ahb1Module::GpioA));
+pub static GPIOA: Gpio = Gpio::new(0x4002_0000);
+pub static GPIOC: Gpio = Gpio::new(0x4002_0800);

@@ -27,6 +27,9 @@ impl<T> Mutex<T> {
     }
 }
 
+unsafe impl<T> Sync for Mutex<T> {}
+unsafe impl<T> Send for Mutex<T> {}
+
 struct MutexInfo {
     locked: bool,
     queue: LinkedList<Waker>

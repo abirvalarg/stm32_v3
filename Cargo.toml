@@ -1,10 +1,10 @@
 [package]
-name = 'stm32_libs'
+name = 'stm32_v3'
 version = "0.1.0"
 edition = "2018"
 
 [features]
-default = ["default_panic", "async", "f401"]
+default = ["default_panic", "f401"]
 default_panic = []
 heap = []
 async = ["heap"]

@@ -4,18 +4,17 @@
 	void heap_init();
 #endif
 
+#pragma GCC diagnostic ignored "-Wmain-return-type"
+void main();
 #ifdef ASYNC
 __attribute__((noreturn))
 void executor_loop();
-#else
-#pragma GCC diagnostic ignored "-Wmain-return-type"
-void main();
 #endif
 
 extern u8 _DATA_START, _DATA_END, _DATA_VAL_START, _BSS_START, _BSS_END;
 
 __attribute__((cold, noreturn))
-void start()
+void reset()
 {
 	for(
 		u8 *src = &_DATA_VAL_START, *dest = &_DATA_START;

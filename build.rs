@@ -8,4 +8,5 @@ fn main() {
 		"src/init.c",
 		"src/irq.c"
 	]);
+	build.compile("c-part.a");
 }
