@@ -33,14 +33,22 @@ pub mod nvic {
 	pub use f4::*;
 }
 
+#[cfg(feature = "f4")]
+pub mod flash {
+	mod f4;
+	pub use f4::*;
+}
+
+#[cfg(feature = "f4")]
+pub mod usb {
+	mod f4;
+	pub use f4::*;
+}
+
 #[cfg(feature = "default_panic")]
 #[panic_handler]
 fn __panic(_info: &core::panic::PanicInfo) -> ! {
-	loop {
-		// unsafe {
-		// 	core::arch::asm!("wfi");
-		// }
-	}
+	loop {}
 }
 
 #[no_mangle]

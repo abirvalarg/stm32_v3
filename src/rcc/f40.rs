@@ -53,6 +53,62 @@ impl Rcc {
 			Apb1(module) => self.switch_apb1(module, state)
 		}
 	}
+
+	pub fn enable_hse(&self, state: bool) {
+		block_irq(|| unsafe {
+			let reg = &mut (*self.0).CR as *mut usize;
+			let val = reg.read_volatile() & !(1 << 16);
+			reg.write_volatile(val | if state { 1 << 16 } else { 0 });
+			if state {
+				while reg.read_volatile() & (1 << 17) == 0 {}
+			}
+		});
+	}
+
+	pub fn enable_pll(&self, state: bool) {
+		block_irq(|| unsafe {
+			let reg = &mut (*self.0).CR as *mut usize;
+			let val = reg.read_volatile() & !(1 << 24);
+			reg.write_volatile(val | if state { 1 << 24 } else { 0 });
+			if state {
+				while reg.read_volatile() & (1 << 25) == 0 {}
+			}
+		});
+	}
+
+	pub fn pll_cfg(&self, q: usize, p: usize, n: usize, m: usize, src: PllSource) {
+		block_irq(|| unsafe {
+			let reg = &mut (*self.0).PLLCFGR as *mut usize;
+			let val = (q & 0b1111) << 24
+				| (p & 0b11) << 16
+				| (n & 0b111111111) << 6
+				| (m & 0b111111)
+				| (src as usize) << 22;
+			reg.write_volatile(val);
+		});
+	}
+
+	pub fn set_system_clock_source(&self, src: SystemClockSource) {
+		block_irq(|| unsafe {
+			let reg = &mut (*self.0).CFGR as *mut usize;
+			let val = reg.read_volatile() & !3;
+			reg.write_volatile(val | (src as usize));
+		});
+	}
+
+	#[cfg(feature = "f401")]
+	pub fn set_bus_psc(&self, ahb: usize, apb1: usize, apb2: usize) {
+		block_irq(|| unsafe {
+			let reg = &mut (*self.0).CFGR as *mut usize;
+			let val = reg.read_volatile()
+				& !0b1111110011110000;
+			let val = val
+				| (ahb & 0b1111) << 4
+				| (apb1 & 0b111) << 10
+				| (apb2 & 0b111) << 13;
+			reg.write_volatile(val);
+		});
+	}
 }
 
 #[derive(Copy, Clone)]
@@ -74,6 +130,17 @@ pub enum Apb1Module {
 pub enum Module {
 	Ahb1(Ahb1Module),
 	Apb1(Apb1Module)
+}
+
+pub enum PllSource {
+	HSI = 0,
+	HSE = 1
+}
+
+pub enum SystemClockSource {
+	HSI = 0b00,
+	HSE = 0b01,
+	PLL = 0b10
 }
 
 pub const RCC: Rcc = Rcc(0x4002_3800 as *mut _);
