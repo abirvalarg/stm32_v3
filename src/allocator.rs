@@ -27,7 +27,7 @@ unsafe impl GlobalAlloc for Allocator {
 		let mut head = self.first_free;
 		loop {
 			if !head.used() && head.layout_fits(size, align) {
-				let aligned = head as usize & !align_mask + align;
+				let aligned = ((head as usize) & !align_mask) + align;
 				let pad_blocks = (aligned - head as usize) / 4;
 				if pad_blocks == 1 {
 					head.offset(1).set_len(0);

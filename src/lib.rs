@@ -35,11 +35,11 @@ pub mod nvic {
 
 #[cfg(feature = "default_panic")]
 #[panic_handler]
-fn __panic(_: &core::panic::PanicInfo) -> ! {
+fn __panic(_info: &core::panic::PanicInfo) -> ! {
 	loop {
-		unsafe {
-			core::arch::asm!("wfi");
-		}
+		// unsafe {
+		// 	core::arch::asm!("wfi");
+		// }
 	}
 }
 

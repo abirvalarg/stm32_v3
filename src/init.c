@@ -1,17 +1,16 @@
 #include "type.h"
 
 #ifdef HEAP
-	void heap_init();
+void heap_init(u8 *start, u8 *end);
 #endif
 
-#pragma GCC diagnostic ignored "-Wmain-return-type"
-void main();
+void start();
 #ifdef ASYNC
 __attribute__((noreturn))
 void executor_loop();
 #endif
 
-extern u8 _DATA_START, _DATA_END, _DATA_VAL_START, _BSS_START, _BSS_END;
+extern u8 _DATA_START, _DATA_END, _DATA_VAL_START, _BSS_START, _BSS_END, _HEAP_START, _HEAP_END;
 
 __attribute__((cold, noreturn))
 void reset()
@@ -31,10 +30,10 @@ void reset()
 		*dest = 0;
 	
 #ifdef HEAP
-	heap_init();
+	heap_init(&_HEAP_START, &_HEAP_END);
 #endif
 
-	main();
+	start();
 #ifdef ASYNC
 	executor_loop();
 #else

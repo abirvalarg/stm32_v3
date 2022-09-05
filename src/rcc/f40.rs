@@ -40,7 +40,7 @@ impl Rcc {
 	pub fn switch_apb1(&self, module: Apb1Module, state: bool) {
 		block_irq(|| unsafe {
 			let module = module as usize;
-			let reg = &mut (*self.0).AHB1ENR as *mut usize;
+			let reg = &mut (*self.0).APB1ENR as *mut usize;
 			let val = reg.read_volatile() & !(1 << module);
 			reg.write_volatile(val | if state { 1 << module } else { 0 });
 		})
