@@ -1,6 +1,6 @@
 use core::{sync::atomic::{AtomicU16, Ordering}};
 
-use crate::sync::block_irq;
+use crate::sync::{block_irq, SyncCell};
 
 #[repr(C)]
 #[allow(non_snake_case)]
@@ -19,33 +19,35 @@ struct Reg {
 
 pub struct Gpio {
 	hw: *mut Reg,
-	used_pins: AtomicU16
+	used_pins: SyncCell<u16>
 }
 
 impl Gpio {
 	const fn new(addr: usize) -> Self {
 		Gpio {
 			hw: addr as *mut Reg,
-			used_pins: AtomicU16::new(0)
+			used_pins: SyncCell::new(0)
 		}
 	}
 
 	pub fn pin(&'static self, num: u8) -> Option<Pin> {
-		if num < 16 {
-			let used_pins = self.used_pins.load(Ordering::Acquire);
-			let res = if used_pins & 1 << num == 0 {
-				Some(Pin {
-					gpio: self,
-					num
-				})
+		block_irq(move || {
+			if num < 16 {
+				let mut used_pins = self.used_pins.get();
+				let res = if *used_pins & 1 << num == 0 {
+					*used_pins |= 1 << num;
+					Some(Pin {
+						gpio: self,
+						num
+					})
+				} else {
+					None
+				};
+				res
 			} else {
 				None
-			};
-			self.used_pins.store(used_pins | 1 << num, Ordering::Release);
-			res
-		} else {
-			None
-		}
+			}
+		})
 	}
 }
 
@@ -102,6 +104,13 @@ impl Pin {
 			let reg = &mut (*self.gpio.hw).BSRR as *mut usize;
 			reg.write_volatile(1 << pos);
 		}
+	}
+}
+
+impl Drop for Pin {
+	fn drop(&mut self) {
+		let mut used_pins = self.gpio.used_pins.get();
+		*used_pins &= !(1 << self.num);
 	}
 }
 
