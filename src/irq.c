@@ -7,8 +7,10 @@ __attribute__((weak, alias("default_handler")))
 void NMI();
 __attribute__((weak, alias("default_handler")))
 void hardfault();
-__attribute__((weak, alias("default_handler")))
+
+#ifdef F4
 void TIM3();
+void TIM4();
 
 __attribute__((section(".vector")))
 void *vector[] = {
@@ -22,10 +24,13 @@ void *vector[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	// 20
 	0, 0, 0, 0, 0, 0, 0, 0, 0, TIM3,
+	// 30
+	TIM4
 };
+
+#endif
 
 void default_handler()
 {
-	while(1)
-		asm("wfi");
+	while(1);
 }

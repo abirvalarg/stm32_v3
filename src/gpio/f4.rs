@@ -1,5 +1,3 @@
-use core::{sync::atomic::{AtomicU16, Ordering}};
-
 use crate::sync::{block_irq, SyncCell};
 
 #[repr(C)]
